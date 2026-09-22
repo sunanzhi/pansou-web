@@ -79,7 +79,7 @@
       </div>
 
       <!-- 主体滚动区域 -->
-      <div class="flex-1 overflow-y-auto p-6 flex flex-col gap-5 text-xs sm:text-sm">
+      <div class="flex-1 overflow-y-auto p-6 flex flex-col gap-5 text-xs sm:text-sm custom-scrollbar">
         <!-- ======================= 1. 常规设置 ======================= -->
         <div v-if="activeNav === 'general'" class="flex flex-col gap-5">
           <!-- API 基础端点 -->
@@ -282,7 +282,7 @@
           </div>
 
           <!-- 频道列表卡片网格 -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-80 overflow-y-auto pr-1">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-80 overflow-y-auto pr-1 custom-scrollbar">
             <div
               v-for="ch in filteredChannelList"
               :key="ch"
@@ -364,7 +364,7 @@
           </div>
 
           <!-- 插件列表网格 -->
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-96 overflow-y-auto pr-1">
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-96 overflow-y-auto pr-1 custom-scrollbar">
             <div
               v-for="p in filteredPluginList"
               :key="p"

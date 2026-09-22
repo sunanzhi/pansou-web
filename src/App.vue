@@ -40,21 +40,6 @@
         />
       </div>
 
-      <!-- 快捷热门推荐 (未搜索时展示) -->
-      <div v-if="!hasSearched" class="w-full max-w-xl mt-6 flex flex-col items-center gap-2 text-xs text-slate-400">
-        <span>热门搜索推荐:</span>
-        <div class="flex flex-wrap justify-center gap-2">
-          <button
-            v-for="item in hotTags"
-            :key="item"
-            type="button"
-            @click="quickSearch(item)"
-            class="px-3 py-1 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-emerald-500 hover:text-emerald-600 transition-colors shadow-sm"
-          >
-            {{ item }}
-          </button>
-        </div>
-      </div>
 
       <!-- 搜索结果区域 -->
       <div v-if="hasSearched" class="w-full mt-4 flex flex-col gap-4">
@@ -130,11 +115,64 @@
       </div>
     </main>
 
-    <!-- 底部版权与免责声明 -->
-    <footer class="w-full py-6 border-t border-slate-200/60 dark:border-slate-800/60 text-center text-xs text-slate-400 dark:text-slate-500">
-      <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-        <span>{{ brandName }} Web · 极简网盘搜索聚合客户端</span>
-        <span>仅供学习与资源聚合索引，本站不存储任何实际网盘文件</span>
+    <!-- 底部推荐引流与版权免责 -->
+    <footer class="w-full py-6 sm:py-8 border-t border-slate-200/60 dark:border-slate-800/60 text-xs text-slate-400 dark:text-slate-500">
+      <div class="max-w-5xl mx-auto px-4 flex flex-col gap-4">
+        <!-- 站点引流推荐卡片 -->
+        <a
+          href="https://mpe.run/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="group relative flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-emerald-500/5 via-teal-500/5 to-slate-100/50 dark:from-emerald-500/10 dark:via-teal-500/5 dark:to-slate-900/60 border border-emerald-500/20 dark:border-emerald-500/20 hover:border-emerald-500/50 dark:hover:border-emerald-500/40 shadow-sm hover:shadow-md transition-all duration-300 text-left overflow-hidden"
+        >
+          <!-- 背景微光微动效 -->
+          <div class="absolute -right-12 -top-12 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all pointer-events-none" />
+
+          <div class="flex items-start sm:items-center gap-3.5 min-w-0 z-10">
+            <div class="p-2 sm:p-2.5 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-500 text-white shadow-md shadow-emerald-500/20 shrink-0 group-hover:scale-105 transition-transform duration-300">
+              <Workflow class="w-4 h-4 sm:w-5 sm:h-5" />
+            </div>
+            <div class="flex flex-col gap-1 min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+                  站长特别推荐
+                </span>
+                <span class="text-sm font-bold text-slate-800 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                  MPE Flow
+                </span>
+                <span class="text-[11px] text-slate-400 dark:text-slate-500 hidden md:inline">
+                  mpe.run
+                </span>
+              </div>
+              <p class="text-xs text-slate-600 dark:text-slate-300 line-clamp-1">
+                开源多协议工作流执行引擎 & 可视化接口测试平台 · 原生支持 HTTP / WebSocket / TCP / UDP / SSE / GraphQL / MCP，内置全域 AI 助手
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 dark:bg-emerald-500 text-white group-hover:bg-emerald-500 dark:group-hover:bg-emerald-400 group-hover:shadow-md group-hover:shadow-emerald-500/25 text-xs font-medium shrink-0 self-end sm:self-center transition-all duration-300 z-10">
+            <span>立即探索</span>
+            <ExternalLink class="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          </div>
+        </a>
+
+        <!-- 底部版权、免责与友链 -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-2.5 text-center sm:text-left">
+          <div class="flex flex-wrap items-center justify-center sm:justify-start gap-x-3 gap-y-1">
+            <span>{{ brandName }} Web · 极简网盘搜索聚合客户端</span>
+            <span class="hidden sm:inline text-slate-300 dark:text-slate-700">|</span>
+            <a
+              href="https://mpe.run/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors inline-flex items-center gap-1"
+            >
+              <span>友情链接: MPE Flow (mpe.run)</span>
+              <ExternalLink class="w-3 h-3 opacity-70" />
+            </a>
+          </div>
+          <span>仅供学习与资源聚合索引，本站不存储任何实际网盘文件</span>
+        </div>
       </div>
     </footer>
 
@@ -158,7 +196,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import { Sparkles, Inbox, Activity, Loader2 } from '@lucide/vue'
+import { Sparkles, Inbox, Activity, Loader2, Workflow, ExternalLink } from '@lucide/vue'
 import Navbar from '@/components/Navbar.vue'
 import SearchBox from '@/components/SearchBox.vue'
 import CloudTabs from '@/components/CloudTabs.vue'
@@ -194,9 +232,6 @@ const batchChecking = ref(false)
 // 弹窗开关
 const showLoginModal = ref(false)
 const showSettingsModal = ref(false)
-
-// 热门快捷搜索
-const hotTags = ['庆余年', '三体', '黑神话悟空', '周杰伦', '4K电影', 'Python教程', '无损音乐']
 
 // 各网盘类型资源数量统计
 const countsByType = computed(() => {
@@ -270,14 +305,6 @@ watch(sentinelRef, () => {
   setupObserver()
 })
 
-function quickSearch(kw: string) {
-  currentKeyword.value = kw
-  handleSearch({
-    keyword: kw,
-    refresh: false,
-    source: settings.value.sourceType,
-  })
-}
 
 function handleResetHome() {
   hasSearched.value = false
