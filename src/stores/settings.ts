@@ -3,6 +3,9 @@ import type { AppSettings } from '@/types'
 
 const SETTINGS_KEY = 'pansou_app_settings'
 
+const DEFAULT_BRAND_NAME = (import.meta.env.VITE_APP_BRAND_NAME as string) || 'PanSearch'
+const DEFAULT_BRAND_SUBTITLE = (import.meta.env.VITE_APP_BRAND_SUBTITLE as string) || '极简聚合搜索'
+
 const defaultSettings: AppSettings = {
   apiBaseUrl: (import.meta.env.VITE_API_BASE_URL as string) || '',
   sourceType: 'all',
@@ -12,6 +15,8 @@ const defaultSettings: AppSettings = {
   defaultIncludeWords: '',
   defaultExcludeWords: '',
   theme: 'system',
+  brandName: DEFAULT_BRAND_NAME,
+  brandSubtitle: DEFAULT_BRAND_SUBTITLE,
 }
 
 function loadSavedSettings(): AppSettings {
@@ -25,6 +30,29 @@ function loadSavedSettings(): AppSettings {
 }
 
 const settings = ref<AppSettings>(loadSavedSettings())
+
+export function applyTheme() {
+  const isDark =
+    settings.value.theme === 'dark' ||
+    (settings.value.theme === 'system' &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches)
+
+  if (isDark) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+}
+
+function updateDocumentTitle() {
+  const name = settings.value.brandName || DEFAULT_BRAND_NAME
+  const subtitle = settings.value.brandSubtitle || DEFAULT_BRAND_SUBTITLE
+  document.title = `${name} - ${subtitle}`
+}
+
+// 模块级监听，避免重复注册
+watch(() => settings.value.theme, applyTheme, { immediate: true })
+watch(() => [settings.value.brandName, settings.value.brandSubtitle], updateDocumentTitle, { immediate: true })
 
 export function useSettingsStore() {
   function saveSettings(newSettings: Partial<AppSettings>) {
@@ -44,22 +72,6 @@ export function useSettingsStore() {
       console.error('Failed to reset settings in localStorage', e)
     }
   }
-
-  function applyTheme() {
-    const isDark =
-      settings.value.theme === 'dark' ||
-      (settings.value.theme === 'system' &&
-        window.matchMedia('(prefers-color-scheme: dark)').matches)
-
-    if (isDark) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
-  }
-
-  // 监听主题变化自动应用
-  watch(() => settings.value.theme, applyTheme, { immediate: true })
 
   return {
     settings,

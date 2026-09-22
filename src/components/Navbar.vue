@@ -8,13 +8,12 @@
         </div>
         <div class="flex flex-col">
           <div class="flex items-center gap-1.5">
-            <span class="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent tracking-tight">PanSou</span>
+            <span class="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent tracking-tight">{{ brandName }}</span>
             <span class="text-xs font-semibold px-1.5 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400">Web</span>
           </div>
-          <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">极简聚合搜索</span>
+          <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">{{ brandSubtitle }}</span>
         </div>
       </div>
-
       <!-- 右侧操作区 -->
       <div class="flex items-center gap-2 sm:gap-3">
         <!-- 主题切换按钮 -->
@@ -52,11 +51,11 @@
           <button
             type="button"
             @click="handleLogout"
-            class="p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200/60 dark:border-rose-800/40 transition-colors"
+            class="inline-flex items-center justify-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200/60 dark:border-rose-800/40 transition-colors shadow-sm"
             title="退出登录"
           >
-            <LogOut class="w-3.5 h-3.5" />
-            <span class="hidden sm:inline ml-1">退出</span>
+            <LogOut class="w-3.5 h-3.5 shrink-0" />
+            <span class="hidden sm:inline">退出</span>
           </button>
         </template>
 
@@ -93,6 +92,9 @@ const { isLoggedIn, username, logout } = useAuthStore()
 const { settings, saveSettings } = useSettingsStore()
 
 const currentTheme = computed(() => settings.value.theme)
+const brandName = computed(() => settings.value.brandName || 'PanSearch')
+const brandSubtitle = computed(() => settings.value.brandSubtitle || '极简聚合搜索')
+
 
 const themeTitle = computed(() => {
   if (currentTheme.value === 'light') return '浅色模式 (点击切换为深色)'

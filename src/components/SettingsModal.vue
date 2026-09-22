@@ -117,6 +117,38 @@
             </div>
           </div>
 
+          <!-- 自定义品牌名称与信息 -->
+          <div class="flex flex-col gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60">
+            <div class="flex items-center justify-between">
+              <label class="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                <Sparkles class="w-4 h-4 text-emerald-500" />
+                <span>品牌与站点信息</span>
+              </label>
+              <span class="text-[11px] text-slate-400">个性化定制主品牌名与副标题</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block font-medium text-slate-600 dark:text-slate-300 mb-1 text-[11px]">主品牌名</label>
+                <input
+                  v-model="form.brandName"
+                  type="text"
+                  placeholder="默认: PanSearch"
+                  class="w-full px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 outline-none focus:border-emerald-500 text-xs"
+                />
+              </div>
+              <div>
+                <label class="block font-medium text-slate-600 dark:text-slate-300 mb-1 text-[11px]">副标题 / 描述</label>
+                <input
+                  v-model="form.brandSubtitle"
+                  type="text"
+                  placeholder="默认: 极简聚合搜索"
+                  class="w-full px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 outline-none focus:border-emerald-500 text-xs"
+                />
+              </div>
+            </div>
+          </div>
+
           <!-- 搜索偏好 -->
           <div class="flex flex-col gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60">
             <h4 class="font-semibold text-slate-800 dark:text-slate-200">搜索偏好</h4>
@@ -395,6 +427,7 @@ import {
   Puzzle,
   X,
   Globe,
+  Sparkles,
   Plus,
   Trash2,
   Search,
@@ -425,6 +458,8 @@ const form = reactive({
   sourceType: settings.value.sourceType,
   concurrency: settings.value.concurrency,
   autoCheckTopLinks: settings.value.autoCheckTopLinks,
+  brandName: settings.value.brandName || '',
+  brandSubtitle: settings.value.brandSubtitle || '',
 })
 
 // 后端探测到的原始完整频道与插件列表
@@ -623,6 +658,8 @@ watch(
       form.sourceType = settings.value.sourceType
       form.concurrency = settings.value.concurrency
       form.autoCheckTopLinks = settings.value.autoCheckTopLinks
+      form.brandName = settings.value.brandName || ''
+      form.brandSubtitle = settings.value.brandSubtitle || ''
       pingResult.value = null
       loadCustomChannels()
       loadBackendMetadata()
@@ -669,10 +706,11 @@ function handleSave() {
     sourceType: form.sourceType,
     concurrency: form.concurrency,
     autoCheckTopLinks: form.autoCheckTopLinks,
+    brandName: form.brandName.trim() || undefined,
+    brandSubtitle: form.brandSubtitle.trim() || undefined,
     enabledChannels: enabledChs,
     enabledPlugins: enabledPls,
   })
-
   showToast(`系统配置已保存 (启用频道: ${enabledChs.length}个, 插件: ${enabledPls.length}个)`, 'success')
   emit('close')
 }
@@ -683,6 +721,8 @@ function handleReset() {
   form.sourceType = settings.value.sourceType
   form.concurrency = settings.value.concurrency
   form.autoCheckTopLinks = settings.value.autoCheckTopLinks
+  form.brandName = settings.value.brandName || ''
+  form.brandSubtitle = settings.value.brandSubtitle || ''
   selectAllChannels()
   selectAllPlugins()
   showToast('已恢复为初始默认配置', 'info')

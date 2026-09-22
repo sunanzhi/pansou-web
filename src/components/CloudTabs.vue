@@ -1,10 +1,10 @@
 <template>
-  <div class="w-full flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none select-none">
+  <div class="w-full flex flex-wrap items-center gap-2 select-none">
     <!-- 全部标签 -->
     <button
       type="button"
       @click="$emit('select', '')"
-      class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition-all shrink-0 flex items-center gap-1.5 border"
+      class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 border shadow-sm"
       :class="[
         activeKey === ''
           ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-transparent shadow-sm'
@@ -30,7 +30,7 @@
       :key="item.key"
       type="button"
       @click="$emit('select', item.key)"
-      class="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition-all shrink-0 flex items-center gap-1.5 border"
+      class="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 border shadow-sm"
       :class="[
         activeKey === item.key
           ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm shadow-emerald-600/20'

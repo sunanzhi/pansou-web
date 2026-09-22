@@ -115,6 +115,8 @@ export interface AppSettings {
   defaultIncludeWords: string
   defaultExcludeWords: string
   theme: 'dark' | 'light' | 'system'
+  brandName?: string
+  brandSubtitle?: string
   enabledChannels?: string[]
   enabledPlugins?: string[]
 }

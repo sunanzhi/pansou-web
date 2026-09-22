@@ -23,7 +23,7 @@
             <Sparkles class="w-8 h-8 sm:w-10 sm:h-10" />
           </div>
           <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-slate-900 via-emerald-800 to-teal-600 dark:from-white dark:via-emerald-300 dark:to-teal-200 bg-clip-text text-transparent">
-            PanSou 聚合搜索
+            {{ brandName }} 聚合搜索
           </h1>
           <p class="mt-3 text-sm sm:text-base text-slate-500 dark:text-slate-400 max-w-md mx-auto">
             极简、纯净、无广告 · 聚合 110+ 源站与海量 Telegram 频道网盘资源
@@ -59,13 +59,15 @@
       <!-- 搜索结果区域 -->
       <div v-if="hasSearched" class="w-full mt-4 flex flex-col gap-4">
         <!-- 分类切换 Tabs & 汇总统计 -->
-        <div class="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200/80 dark:border-slate-800/80">
-          <CloudTabs
-            :active-key="activeTab"
-            :total-count="displayResults.length"
-            :counts-by-type="countsByType"
-            @select="activeTab = $event"
-          />
+        <div class="w-full flex flex-col sm:flex-row sm:items-start justify-between gap-3 pb-3 border-b border-slate-200/80 dark:border-slate-800/80">
+          <div class="flex-1 min-w-0">
+            <CloudTabs
+              :active-key="activeTab"
+              :total-count="displayResults.length"
+              :counts-by-type="countsByType"
+              @select="handleSelectTab"
+            />
+          </div>
 
           <!-- 批量检测存活按钮 (仅登录用户且有结果时显示) -->
           <button
@@ -73,7 +75,7 @@
             type="button"
             @click="batchCheckVisibleLinks"
             :disabled="batchChecking"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-600 dark:text-slate-300 hover:text-emerald-600 text-xs font-medium border border-slate-200 dark:border-slate-700 transition-colors shrink-0"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-600 dark:text-slate-300 hover:text-emerald-600 text-xs font-medium border border-slate-200 dark:border-slate-700 transition-colors shrink-0 self-start sm:self-auto"
             title="一键检测当前前 10 条支持网盘的存活状态"
           >
             <Loader2 v-if="batchChecking" class="w-3.5 h-3.5 animate-spin" />
@@ -87,16 +89,34 @@
           <div v-for="i in 3" :key="i" class="w-full h-32 rounded-2xl bg-slate-100 dark:bg-slate-900/60 animate-pulse border border-slate-200/50 dark:border-slate-800/50"></div>
         </div>
 
-        <!-- 搜索结果列表 -->
+        <!-- 搜索结果列表 (支持懒加载) -->
         <div v-else-if="filteredResults.length > 0" class="w-full flex flex-col gap-3.5">
           <ResultCard
-            v-for="res in filteredResults"
-            :key="res.unique_id || res.message_id"
+            v-for="res in visibleResults"
+            :key="res.unique_id || res.message_id || (res.channel + res.datetime)"
             :result="res"
             :check-results="checkResults"
             :checking-status="checkingStatus"
             @check-link="handleCheckLink"
           />
+
+          <!-- 懒加载交互区与状态提示 -->
+          <div class="w-full py-4 flex flex-col items-center justify-center gap-2">
+            <!-- 滚动探测哨兵 -->
+            <div ref="sentinelRef" class="h-1 w-full pointer-events-none"></div>
+
+            <button
+              v-if="hasMore"
+              type="button"
+              @click="loadMore"
+              class="px-5 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium border border-slate-200 dark:border-slate-800 transition-colors shadow-sm flex items-center gap-2"
+            >
+              <span>加载更多结果 (已展示 {{ visibleResults.length }} / 共 {{ filteredResults.length }} 条)</span>
+            </button>
+            <span v-else class="text-xs text-slate-400 dark:text-slate-500 py-2">
+              已展示全部 {{ filteredResults.length }} 条结果
+            </span>
+          </div>
         </div>
 
         <!-- 无结果空状态 -->
@@ -113,7 +133,7 @@
     <!-- 底部版权与免责声明 -->
     <footer class="w-full py-6 border-t border-slate-200/60 dark:border-slate-800/60 text-center text-xs text-slate-400 dark:text-slate-500">
       <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-        <span>PanSou Web · 极简网盘搜索聚合客户端</span>
+        <span>{{ brandName }} Web · 极简网盘搜索聚合客户端</span>
         <span>仅供学习与资源聚合索引，本站不存储任何实际网盘文件</span>
       </div>
     </footer>
@@ -137,7 +157,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { Sparkles, Inbox, Activity, Loader2 } from '@lucide/vue'
 import Navbar from '@/components/Navbar.vue'
 import SearchBox from '@/components/SearchBox.vue'
@@ -154,6 +174,11 @@ import type { SearchResult, Link, CheckResult, SearchRequest } from '@/types'
 
 const { isLoggedIn, setBackendAuthEnabled } = useAuthStore()
 const { settings } = useSettingsStore()
+const brandName = computed(() => settings.value.brandName || 'PanSearch')
+
+const PAGE_SIZE = 20
+const visibleLimit = ref(PAGE_SIZE)
+
 
 const currentKeyword = ref('')
 const searching = ref(false)
@@ -195,9 +220,54 @@ const filteredResults = computed(() => {
     .filter((item) => (item.links || []).some((l) => (l.type || '').toLowerCase() === tab))
     .map((item) => ({
       ...item,
-      // 保持只显示当前分类的链接（或者把符合分类的链接优先排在前面）
       links: (item.links || []).filter((l) => (l.type || '').toLowerCase() === tab),
     }))
+})
+
+// 懒加载切片展示
+const visibleResults = computed(() => {
+  return filteredResults.value.slice(0, visibleLimit.value)
+})
+
+const hasMore = computed(() => {
+  return visibleResults.value.length < filteredResults.value.length
+})
+
+function loadMore() {
+  if (hasMore.value) {
+    visibleLimit.value += PAGE_SIZE
+  }
+}
+
+function handleSelectTab(key: string) {
+  activeTab.value = key
+  visibleLimit.value = PAGE_SIZE
+}
+
+const sentinelRef = ref<HTMLElement | null>(null)
+let observer: IntersectionObserver | null = null
+
+function setupObserver() {
+  if (observer) {
+    observer.disconnect()
+    observer = null
+  }
+  if (!sentinelRef.value || typeof IntersectionObserver === 'undefined') return
+
+  observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0]?.isIntersecting && hasMore.value) {
+        loadMore()
+      }
+    },
+    { rootMargin: '200px' }
+  )
+
+  observer.observe(sentinelRef.value)
+}
+
+watch(sentinelRef, () => {
+  setupObserver()
 })
 
 function quickSearch(kw: string) {
@@ -214,6 +284,7 @@ function handleResetHome() {
   currentKeyword.value = ''
   displayResults.value = []
   activeTab.value = ''
+  visibleLimit.value = PAGE_SIZE
 }
 
 async function handleSearch(payload: {
@@ -228,7 +299,7 @@ async function handleSearch(payload: {
   searching.value = true
   hasSearched.value = true
   activeTab.value = ''
-
+  visibleLimit.value = PAGE_SIZE
   const req: SearchRequest = {
     kw: payload.keyword.trim(),
     src: payload.source || settings.value.sourceType || 'all',
@@ -364,8 +435,8 @@ async function batchCheckVisibleLinks() {
 }
 
 function handleLoginSuccess() {
-  // 如果之前因为 401 搜索中断，自动重新触发搜索
-  if (currentKeyword.value.trim() && hasSearched.value) {
+  // 如果之前搜索因未登录导致无结果，登录成功后重新触发搜索
+  if (currentKeyword.value.trim() && hasSearched.value && displayResults.value.length === 0) {
     handleSearch({
       keyword: currentKeyword.value,
       refresh: false,
@@ -386,6 +457,13 @@ onMounted(async () => {
     setBackendAuthEnabled(health.auth_enabled)
   } catch {
     // 忽略初次探活异常
+  }
+})
+
+onUnmounted(() => {
+  if (observer) {
+    observer.disconnect()
+    observer = null
   }
 })
 </script>
