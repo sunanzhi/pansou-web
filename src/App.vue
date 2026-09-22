@@ -237,6 +237,16 @@ async function handleSearch(payload: {
     res: 'all',
   }
 
+  // 用户自定义勾选的频道
+  if (settings.value.enabledChannels && settings.value.enabledChannels.length > 0) {
+    req.channels = settings.value.enabledChannels
+  }
+
+  // 用户自定义勾选的插件
+  if (settings.value.enabledPlugins && settings.value.enabledPlugins.length > 0) {
+    req.plugins = settings.value.enabledPlugins
+  }
+
   if (payload.include?.length || payload.exclude?.length) {
     req.filter = {
       include: payload.include,
